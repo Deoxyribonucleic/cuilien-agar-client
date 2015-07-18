@@ -30,6 +30,7 @@ from agario.client import Client
 from agario.utils import special_names, get_party_address, find_server
 from agario.vec import Vec
 from .drawutils import *
+from .reload import Reloadable
 from .subscriber import MultiSubscriber, Subscriber
 from .window import WorldViewer
 
@@ -258,15 +259,23 @@ class Logger(Subscriber):
                            text, size=10, face='monospace')
 
 
-class MassGraph(Subscriber):
+class MassGraph(Reloadable):
+    _persistent_attributes = ['graph']
+
     def __init__(self, client):
+        self.capture_args(locals())
         self.client = client
         self.graph = []
+        self.timer = 0
 
     def on_respawn(self):
         self.graph.clear()
 
     def on_world_update_post(self):
+        self.timer += 1
+        if self.timer % 25 == 0:
+            self.reload()
+
         player = self.client.player
         if not player.is_alive:
             return
