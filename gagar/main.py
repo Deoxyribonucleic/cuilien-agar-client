@@ -13,6 +13,8 @@ from .skins import CellSkins
 from .subscriber import MultiSubscriber, Subscriber
 from .window import WorldViewer
 
+from .cuilien import Bot
+
 
 class NativeControl(Subscriber):
     def __init__(self, client):
@@ -20,17 +22,19 @@ class NativeControl(Subscriber):
         self.movement_delta = Vec()
 
     def send_mouse(self):
-        if self.client.player.is_alive:
-            target = self.client.player.center + self.movement_delta
-            self.client.send_target(*target)
+        pass
+        #if self.client.player.is_alive:
+        #    target = self.client.player.center + self.movement_delta
+        #    self.client.send_target(*target)
 
     def on_world_update_post(self):
         # keep cells moving even when mouse stands still
         self.send_mouse()
 
     def on_mouse_moved(self, pos, pos_world):
-        self.movement_delta = pos_world - self.client.player.center
-        self.send_mouse()
+        pass 
+        #self.movement_delta = pos_world - self.client.player.center
+        #self.send_mouse()
 
     def on_mouse_pressed(self, button):
         if button == 2: # Middle click
@@ -41,14 +45,15 @@ class NativeControl(Subscriber):
             self.client.send_split()
 
     def on_key_pressed(self, val, char):
-        if char == 'w':
-            self.send_mouse()
-            self.client.send_shoot()
-        elif val == Gdk.KEY_space:
-            self.send_mouse()
-            self.client.send_split()
-        elif char == 'k':
-            self.client.send_explode()
+        pass
+        #if char == 'w':
+        #    self.send_mouse()
+        #    self.client.send_shoot()
+        #elif val == Gdk.KEY_space:
+        #    self.send_mouse()
+        #    self.client.send_split()
+        #elif char == 'k':
+        #    self.client.send_explode()
 
 
 def format_log(lines, width, indent='  '):
@@ -159,7 +164,6 @@ def gtk_watch_client(client):
     GLib.io_add_watch(client.ws, GLib.IO_ERR, lambda ws, _: client.subscriber.on_sock_error() or True)
     GLib.io_add_watch(client.ws, GLib.IO_HUP, lambda ws, _: client.disconnect() or True)
 
-
 def gtk_main_loop():
     # Gtk.main() swallows exceptions, get them back
     sys.excepthook = lambda *args: sys.__excepthook__(*args) or sys.exit()
@@ -200,6 +204,7 @@ class GtkControl(Subscriber):
         self.client = client = Client(self.multi_sub)
 
         self.multi_sub.sub(NativeControl(client))
+        self.multi_sub.sub(Bot(client))
 
         # background
         key(Gdk.KEY_F2, SolidBackground())
@@ -288,3 +293,4 @@ def main():
 
     GtkControl(address, token, nick)
     gtk_main_loop()
+
