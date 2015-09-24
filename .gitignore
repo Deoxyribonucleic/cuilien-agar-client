@@ -5,3 +5,6 @@ agarnet.egg-info/
 build/
 dist/
 MANIFEST
+*.swp
+*.swo
+
