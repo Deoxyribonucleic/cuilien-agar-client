@@ -13,12 +13,18 @@ class Bot(Subscriber):
         if char == 'o':
             print("o pressed :)")
 
-    def on_new_target(self, x, y):
+    def on_set_target_command(self, x, y):
         print("sending target:", x, y)
         self.client.send_target(x, y)
 
     def on_ingame(self):
         self.conn.send_ready()
+    
+    def on_death(self):
+        self.conn.send_death()
+    
+    def on_respawn(self):
+        self.conn.send_spawned()
 
     def on_respawn_command(self):
         print("respawning!")
@@ -27,6 +33,10 @@ class Bot(Subscriber):
 class MessageType:
     ready = 1
     respawn = 2
+    death = 3
+    update = 4
+    set_target = 5
+    spawned = 6
 
 class BotConnection():
 
@@ -49,8 +59,17 @@ class BotConnection():
         if message_type == MessageType.respawn:
             self.sub.on_respawn_command()
 
+        elif message_type == MessageType.set_target:
+            self.sub.on_set_target_command(message["x"], message["y"])
+
     def send_ready(self):
         self.send_message({ "type": MessageType.ready });
+
+    def send_death(self):
+        self.send_message({ "type": MessageType.death });
+
+    def send_spawned(self):
+        self.send_message({ "type": MessageType.spawned });
 
     def send_message(self, msg):
         data = json.dumps(msg).encode('utf8')
